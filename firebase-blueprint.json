@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile details and status",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "status": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "browser": { "type": "string" },
+        "os": { "type": "string" },
+        "ip": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "lastLogin": { "type": "string" },
+        "lastSeen": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "devToolOpenCount": { "type": "integer" },
+        "devToolTotalTime": { "type": "integer" },
+        "blocked": { "type": "boolean" }
+      },
+      "required": ["uid", "name", "email", "role", "status", "blocked"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Courses available on the platform",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string" },
+        "title": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["courseId", "title", "description"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Subjects belonging to a course",
+      "type": "object",
+      "properties": {
+        "subjectId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "title": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["subjectId", "courseId", "title"]
+    },
+    "Lecture": {
+      "title": "Lecture",
+      "description": "Individual lectures under a subject",
+      "type": "object",
+      "properties": {
+        "lectureId": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "title": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "pdfUrl": { "type": "string" },
+        "duration": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["lectureId", "subjectId", "title", "videoUrl"]
+    },
+    "DeviceLog": {
+      "title": "DeviceLog",
+      "description": "Logs of user interaction and DevTools detection",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "openedAt": { "type": "string" },
+        "closedAt": { "type": "string" },
+        "duration": { "type": "integer" },
+        "browser": { "type": "string" },
+        "os": { "type": "string" },
+        "platform": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "screenSize": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["deviceId", "timestamp"]
+    },
+    "BlockedDevice": {
+      "title": "BlockedDevice",
+      "description": "DeviceIds blacklisted by the system",
+      "type": "object",
+      "properties": {
+        "deviceId": { "type": "string" },
+        "blockedAt": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "required": ["deviceId"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "Global settings for the learning platform",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "value": { "type": "string" }
+      },
+      "required": ["key", "value"]
+    },
+    "AdminLog": {
+      "title": "AdminLog",
+      "description": "Audit log for admin actions",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string" },
+        "adminId": { "type": "string" },
+        "action": { "type": "string" },
+        "targetUid": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["logId", "adminId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and security fields"
+    },
+    "courses/{courseId}": {
+      "schema": "Course",
+      "description": "Main online courses available"
+    },
+    "subjects/{subjectId}": {
+      "schema": "Subject",
+      "description": "Subjects that are inside a course"
+    },
+    "lectures/{lectureId}": {
+      "schema": "Lecture",
+      "description": "Lectures, video info and PDFs of a subject"
+    },
+    "deviceLogs/{logId}": {
+      "schema": "DeviceLog",
+      "description": "DevTools detection logs and general device reports"
+    },
+    "blockedDevices/{deviceId}": {
+      "schema": "BlockedDevice",
+      "description": "List of blacklisted devices to instantly sign out or block"
+    },
+    "settings/{settingId}": {
+      "schema": "Setting",
+      "description": "Dynamic configuration values"
+    },
+    "adminLogs/{logId}": {
+      "schema": "AdminLog",
+      "description": "Admin console audits"
+    }
+  }
+}

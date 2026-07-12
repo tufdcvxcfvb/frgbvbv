@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Academy - Secure Admin Panel</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Link Compiled CSS -->
+  <link rel="stylesheet" href="./admin.css">
+</head>
+<body class="bg-[#05060b] text-slate-100 font-sans min-h-screen relative overflow-x-hidden antialiased selection:bg-indigo-500/30 selection:text-white">
+
+  <!-- Ambient background elements -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute top-[-20%] left-[-10%] w-[50%] aspect-square rounded-full bg-indigo-500/10 blur-[120px] animate-pulse"></div>
+    <div class="absolute bottom-[-20%] right-[-10%] w-[50%] aspect-square rounded-full bg-purple-500/10 blur-[120px] animate-pulse duration-5000"></div>
+  </div>
+
+  <!-- ================= AUTHENTICATION SCREEN ================= -->
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#05060b]/90 backdrop-blur-md">
+    <div class="w-full max-w-md bg-white/5 border border-white/10 p-8 rounded-[32px] backdrop-blur-xl shadow-2xl flex flex-col gap-6 relative overflow-hidden transition-all duration-300">
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl"></div>
+      
+      <div class="text-center flex flex-col items-center gap-2">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-xl">
+          A
+        </div>
+        <h1 class="text-xl font-bold font-display tracking-tight text-white mt-3">Aura Secure Admin Portal</h1>
+        <p class="text-xs text-white/50">Enter credentials with administrative privileges</p>
+      </div>
+
+      <form id="loginForm" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Email Address</label>
+          <input 
+            type="email" 
+            id="loginEmail" 
+            placeholder="admin@aura.academy" 
+            required
+            class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-xs focus:border-indigo-500 focus:outline-none transition"
+          >
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Password</label>
+          <input 
+            type="password" 
+            id="loginPassword" 
+            placeholder="••••••••••••" 
+            required
+            class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-xs focus:border-indigo-500 focus:outline-none transition"
+          >
+        </div>
+
+        <!-- System Message -->
+        <div id="loginMessage" class="hidden text-xs font-bold text-center p-3 rounded-xl border"></div>
+
+        <button 
+          type="submit"
+          id="loginBtn"
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition text-xs shadow-lg active:scale-98"
+        >
+          Verify Credentials &rarr;
+        </button>
+      </form>
+
+      <div class="text-center border-t border-white/5 pt-4">
+        <a href="/" class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition">
+          &larr; Back to Student Platform
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= MAIN ADMIN DASHBOARD ================= -->
+  <div id="adminDashboard" class="hidden min-h-screen flex flex-col md:flex-row relative">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="w-full md:w-64 bg-white/5 border-r border-white/10 flex flex-col justify-between p-6 backdrop-blur-xl shrink-0 transition-transform md:translate-x-0">
+      <div class="flex flex-col gap-8">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+            A
+          </div>
+          <div>
+            <h2 class="text-sm font-extrabold tracking-tight text-white font-display">AURA ADMIN</h2>
+            <span class="text-[9px] font-mono text-indigo-400 font-bold tracking-widest uppercase">Console v1.2</span>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex flex-col gap-1.5">
+          <button data-tab="dashboard" class="sidebar-item active">
+            <span class="icon">📊</span> Dashboard
+          </button>
+          <button data-tab="users" class="sidebar-item">
+            <span class="icon">👥</span> Users
+          </button>
+          <button data-tab="courses" class="sidebar-item">
+            <span class="icon">📚</span> Courses
+          </button>
+          <button data-tab="subjects" class="sidebar-item">
+            <span class="icon">🧬</span> Subjects
+          </button>
+          <button data-tab="lectures" class="sidebar-item">
+            <span class="icon">🎥</span> Lectures
+          </button>
+          <button data-tab="logs" class="sidebar-item">
+            <span class="icon">📑</span> Device Logs
+          </button>
+          <button data-tab="devtools" class="sidebar-item">
+            <span class="icon">🚨</span> DevTools Monitor
+          </button>
+          <button data-tab="blocked" class="sidebar-item">
+            <span class="icon">🚫</span> Blocked Devices
+          </button>
+          <button data-tab="analytics" class="sidebar-item">
+            <span class="icon">📈</span> Analytics
+          </button>
+          <button data-tab="settings" class="sidebar-item">
+            <span class="icon">⚙️</span> Settings
+          </button>
+        </nav>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="flex flex-col gap-4 border-t border-white/5 pt-4 mt-6">
+        <!-- Theme & User Profile -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <img id="adminAvatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=admin" class="w-8 h-8 rounded-full border border-indigo-500 bg-slate-900 object-cover" />
+            <div class="overflow-hidden max-w-[110px]">
+              <p id="adminName" class="text-[11px] font-bold text-white truncate">Admin User</p>
+              <span class="text-[8px] text-white/40 block uppercase tracking-widest font-bold">SUPER_ADMIN</span>
+            </div>
+          </div>
+          <!-- Theme Switcher -->
+          <button id="themeToggle" class="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white/60 hover:text-white transition" title="Toggle Theme">
+            🌓
+          </button>
+        </div>
+
+        <button id="logoutBtn" class="w-full py-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold rounded-xl transition text-xs flex justify-center items-center gap-1.5">
+          🚪 Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN BODY VIEW CONTENT -->
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto max-h-screen">
+      
+      <!-- Top Bar -->
+      <header class="flex justify-between items-center pb-6 mb-6 border-b border-white/10">
+        <div>
+          <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Active System Monitor</span>
+          <h1 id="pageTitle" class="text-xl font-extrabold tracking-tight text-white font-display">System Overview</h1>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="text-[10px] text-white/50 font-mono">Live Sync Connected</span>
+        </div>
+      </header>
+
+      <!-- ================== VIEW: DASHBOARD ================== -->
+      <section id="view-dashboard" class="view-section flex flex-col gap-8">
+        
+        <!-- Dashboard Statistics Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Total Users</span>
+                <span id="stat-total-users" class="value">0</span>
+              </div>
+              <span class="icon">👥</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Active Users</span>
+                <span id="stat-active-users" class="value">0</span>
+              </div>
+              <span class="icon">🟢</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Total Courses</span>
+                <span id="stat-total-courses" class="value">0</span>
+              </div>
+              <span class="icon">📚</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Total Subjects</span>
+                <span id="stat-total-subjects" class="value">0</span>
+              </div>
+              <span class="icon">🧬</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Total Lectures</span>
+                <span id="stat-total-lectures" class="value">0</span>
+              </div>
+              <span class="icon">🎥</span>
+            </div>
+          </div>
+          <div class="stat-card flex-col">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Online Users</span>
+                <span id="stat-online-users" class="value">0</span>
+              </div>
+              <span class="icon">⚡</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">DevTools Alerts</span>
+                <span id="stat-devtools-count" class="value">0</span>
+              </div>
+              <span class="icon">🚨</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="title">Blocked Users</span>
+                <span id="stat-blocked-count" class="value">0</span>
+              </div>
+              <span class="icon">🚫</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions & System log -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl">
+            <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wider font-display">Recent Device Incidents</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="text-white/40 border-b border-white/5">
+                    <th class="py-2.5">User</th>
+                    <th class="py-2.5">Device ID</th>
+                    <th class="py-2.5">OS/Browser</th>
+                    <th class="py-2.5">Opened At</th>
+                    <th class="py-2.5">Duration</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-incidents-list">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl flex flex-col gap-4">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-display">Platform Operations</h3>
+            <p class="text-xs text-white/50 leading-relaxed">Direct administrative shortcuts to populate secure Firestore collections or configurations.</p>
+            
+            <div class="flex flex-col gap-2 mt-2">
+              <button onclick="document.querySelector('[data-tab=courses]').click()" class="action-btn">📚 Manage Courses</button>
+              <button onclick="document.querySelector('[data-tab=subjects]').click()" class="action-btn">🧬 Manage Subjects</button>
+              <button onclick="document.querySelector('[data-tab=lectures]').click()" class="action-btn">🎥 Manage Lectures</button>
+              <button id="seedDemoDataBtn" class="py-2 px-3 bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600 text-indigo-400 hover:text-white rounded-xl text-xs font-bold transition">
+                ⚡ Seed Database Catalog
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: USERS ================== -->
+      <section id="view-users" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <p class="text-xs text-white/50">Manage student enrollment, roles, suspended accounts, and telemetry details.</p>
+          <div class="flex gap-2">
+            <input type="text" id="userSearch" placeholder="Search by name/email..." class="search-input">
+          </div>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden backdrop-blur-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold">
+                  <th class="p-4">User Details</th>
+                  <th class="p-4">Role</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4">Telemetry Metrics</th>
+                  <th class="p-4">Last Seen</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: COURSES ================== -->
+      <section id="view-courses" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <p class="text-xs text-white/50">Add, edit, or delete verified courses. All entries are synced instantly to the Cloud.</p>
+          <button id="addCourseBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow">
+            ➕ Add Course
+          </button>
+        </div>
+
+        <!-- Course Edit Modal / Form -->
+        <div id="courseFormContainer" class="hidden bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl flex flex-col gap-4">
+          <h3 id="courseFormTitle" class="text-sm font-bold text-white font-display">Create Course</h3>
+          <form id="courseForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" id="courseIdField">
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Course Name/Title</label>
+              <input type="text" id="courseTitleField" required placeholder="e.g. Full-Stack Web Architecture" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Course ID (unique key)</label>
+              <input type="text" id="courseIdKeyField" required placeholder="e.g. fullstack-web-architecture" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Thumbnail Image Link</label>
+              <input type="text" id="courseThumbnailField" required placeholder="https://..." class="form-input">
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Description</label>
+              <textarea id="courseDescField" required rows="3" placeholder="Enter academic track curriculum descriptions..." class="form-input"></textarea>
+            </div>
+            <div class="flex gap-2 justify-end md:col-span-2">
+              <button type="button" id="cancelCourseBtn" class="px-4 py-2 bg-white/5 border border-white/10 text-white rounded-xl text-xs font-bold transition">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">Save Course</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Grid of real courses -->
+        <div id="admin-courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamic cards -->
+        </div>
+      </section>
+
+      <!-- ================== VIEW: SUBJECTS ================== -->
+      <section id="view-subjects" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <p class="text-xs text-white/50">Subjects structure curriculum inside the parent Courses.</p>
+          <button id="addSubjectBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow">
+            ➕ Add Subject Block
+          </button>
+        </div>
+
+        <!-- Subject Form -->
+        <div id="subjectFormContainer" class="hidden bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl flex flex-col gap-4">
+          <h3 id="subjectFormTitle" class="text-sm font-bold text-white font-display">Create Subject Block</h3>
+          <form id="subjectForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" id="subjectIdField">
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Subject Name/Title</label>
+              <input type="text" id="subjectTitleField" required placeholder="e.g. Advanced Docker Containers" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Subject ID (unique key)</label>
+              <input type="text" id="subjectIdKeyField" required placeholder="e.g. docker-containers-advanced" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Parent Course</label>
+              <select id="subjectCourseSelect" required class="form-input bg-[#0c0d13] text-white">
+                <!-- Loaded dynamically -->
+              </select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Thumbnail Image Link</label>
+              <input type="text" id="subjectThumbnailField" required placeholder="https://..." class="form-input">
+            </div>
+            <div class="flex gap-2 justify-end md:col-span-2">
+              <button type="button" id="cancelSubjectBtn" class="px-4 py-2 bg-white/5 border border-white/10 text-white rounded-xl text-xs font-bold transition">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">Save Subject</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Subjects Table -->
+        <div class="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden backdrop-blur-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold">
+                <th class="p-4">Thumbnail</th>
+                <th class="p-4">Subject Title</th>
+                <th class="p-4">Parent Course</th>
+                <th class="p-4">Created At</th>
+                <th class="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subjects-table-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: LECTURES ================== -->
+      <section id="view-lectures" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <p class="text-xs text-white/50">Lectures anchor secure video HLS streams and companion PDF files.</p>
+          <button id="addLectureBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow">
+            ➕ Add Lecture
+          </button>
+        </div>
+
+        <!-- Lecture Form -->
+        <div id="lectureFormContainer" class="hidden bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl flex flex-col gap-4">
+          <h3 id="lectureFormTitle" class="text-sm font-bold text-white font-display">Create Lecture Block</h3>
+          <form id="lectureForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" id="lectureIdField">
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Lecture Title</label>
+              <input type="text" id="lectureTitleField" required placeholder="e.g. Multi-stage Docker Builds" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Lecture ID (unique key)</label>
+              <input type="text" id="lectureIdKeyField" required placeholder="e.g. docker-multistage-builds" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Parent Subject</label>
+              <select id="lectureSubjectSelect" required class="form-input bg-[#0c0d13] text-white">
+                <!-- Loaded dynamically -->
+              </select>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Duration String</label>
+              <input type="text" id="lectureDurationField" required placeholder="e.g. 14:25" class="form-input">
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Thumbnail Image Link</label>
+              <input type="text" id="lectureThumbnailField" required placeholder="https://..." class="form-input">
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Secure Video URL (HLS / MP4)</label>
+              <input type="text" id="lectureVideoUrlField" required placeholder="https://..." class="form-input">
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Companion PDF Link (Optional)</label>
+              <input type="text" id="lecturePdfUrlField" placeholder="https://..." class="form-input">
+            </div>
+            <div class="flex gap-2 justify-end md:col-span-2">
+              <button type="button" id="cancelLectureBtn" class="px-4 py-2 bg-white/5 border border-white/10 text-white rounded-xl text-xs font-bold transition">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">Save Lecture</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lectures Table -->
+        <div class="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden backdrop-blur-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold">
+                <th class="p-4">Thumbnail</th>
+                <th class="p-4">Lecture Title</th>
+                <th class="p-4">Parent Subject</th>
+                <th class="p-4">Duration</th>
+                <th class="p-4">PDF Asset</th>
+                <th class="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="lectures-table-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: DEVICE LOGS ================== -->
+      <section id="view-logs" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center">
+          <p class="text-xs text-white/50 font-medium">Real-time system device telemetry log record.</p>
+          <button id="clearLogsBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
+            🧹 Clear Incident Logs
+          </button>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden backdrop-blur-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold">
+                  <th class="p-4">Log ID</th>
+                  <th class="p-4">User UID</th>
+                  <th class="p-4">Device ID</th>
+                  <th class="p-4">OS/Browser</th>
+                  <th class="p-4">Opened At</th>
+                  <th class="p-4">Closed At</th>
+                  <th class="p-4">Duration</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: DEVTOOLS MONITOR ================== -->
+      <section id="view-devtools" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center">
+          <p class="text-xs text-white/50">Real-time inspections showing security triggers whenever developer console is loaded.</p>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden backdrop-blur-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold">
+                  <th class="p-4">User Email</th>
+                  <th class="p-4">Device OS/Browser</th>
+                  <th class="p-4">Platform Type</th>
+                  <th class="p-4">Screen Dimensions</th>
+                  <th class="p-4">Total Incidents</th>
+                  <th class="p-4">Total Debugging Time</th>
+                </tr>
+              </thead>
+              <tbody id="devtools-table-body">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: BLOCKED DEVICES ================== -->
+      <section id="view-blocked" class="view-section hidden flex flex-col gap-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <p class="text-xs text-white/50">Ban or authorize devices or user ids directly to enforce platform license rules.</p>
+          <button id="blockNewDeviceBtn" class="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow">
+            🚫 Block Device / UID
+          </button>
+        </div>
+
+        <!-- Block device Form -->
+        <div id="blockedDeviceFormContainer" class="hidden bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl flex flex-col gap-4">
+          <h3 class="text-sm font-bold text-white font-display">Restrict Device access</h3>
+          <form id="blockedDeviceForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Device ID or User ID</label>
+              <input type="text" id="blockedKeyField" required placeholder="e.g. dev_..." class="form-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">Ban Reason</label>
+              <input type="text" id="blockedReasonField" required placeholder="e.g. Multiple DevTools triggers" class="form-input">
+            </div>
+            <div class="flex gap-2 justify-end md:col-span-2">
+              <button type="button" id="cancelBlockedBtn" class="px-4 py-2 bg-white/5 border border-white/10 text-white rounded-xl text-xs font-bold transition">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition">Block Device</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-[24px] overflow-hidden backdrop-blur-xl">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold">
+                <th class="p-4">Target Device ID / User UID</th>
+                <th class="p-4">Blocked Date</th>
+                <th class="p-4">Suspension Reason</th>
+                <th class="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="blocked-table-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: ANALYTICS ================== -->
+      <section id="view-analytics" class="view-section hidden flex flex-col gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl">
+            <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wider font-display">Student Browser Demographics</h3>
+            <div class="flex flex-col gap-3" id="analytics-browser-chart">
+              <!-- Dynamic percentages -->
+            </div>
+          </div>
+          <div class="bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl">
+            <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wider font-display">Operating Systems</h3>
+            <div class="flex flex-col gap-3" id="analytics-os-chart">
+              <!-- Dynamic percentages -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================== VIEW: SETTINGS ================== -->
+      <section id="view-settings" class="view-section hidden flex flex-col gap-6">
+        <div class="bg-white/5 border border-white/10 p-6 rounded-[24px] backdrop-blur-xl max-w-xl flex flex-col gap-6">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider font-display border-b border-white/10 pb-2">Platform Controls</h3>
+          
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl">
+              <div>
+                <p class="text-xs font-bold text-white">DevTools Lockout Trigger</p>
+                <span class="text-[10px] text-white/40">Instantly suspend accounts if DevTools is opened more than 5 times.</span>
+              </div>
+              <input type="checkbox" id="settingDevToolsLockout" checked class="w-4 h-4 rounded text-indigo-600 bg-[#0a0c12] border-white/10 focus:ring-indigo-500">
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] font-bold text-white/40 uppercase tracking-wider">System License Key</label>
+              <input type="password" value="AURA_ACADEMY_ENTERPRISE_LICENSE_2026" readonly class="form-input font-mono select-all">
+            </div>
+
+            <button id="saveSettingsBtn" class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow w-fit">
+              Save Platform Config
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

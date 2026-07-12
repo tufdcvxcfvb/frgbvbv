@@ -1,0 +1,6 @@
+{
+  "name": "Online Learning Platform",
+  "description": "A secure, premium online learning platform featuring interactive courses, a companion secure PDF document viewer, HLS/MP4 adaptive media player, real-time index searching, status heartbeats, and deep client-side DevTools security telemetry logging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

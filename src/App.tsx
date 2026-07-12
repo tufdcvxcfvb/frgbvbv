@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DashboardLayout } from './components/DashboardLayout';
@@ -15,8 +15,10 @@ import {
   DownloadsView, 
   ProfileView 
 } from './components/Pages';
+import { AdminView } from './components/AdminView';
 import { useDevToolsDetector } from './hooks/useDevToolsDetector';
 import { seedDatabase } from './utils/seed';
+import toast from 'react-hot-toast';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -26,14 +28,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#05060b] flex-col gap-4 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-xl animate-pulse">
-          A
-        </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-slate-300 font-bold tracking-wide animate-pulse">Loading secure academic node...</p>
-          <p className="text-[10px] text-slate-500 font-mono">Verifying student identity token</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-[#05060b]">
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -49,19 +45,45 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      if (user.role !== 'admin') {
+        toast.error('Access Denied. Administrator privileges required.');
+        navigate('/home', { replace: true });
+      }
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#05060b]">
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return null; // Empty page while redirecting via useEffect
+  }
+
+  return <>{children}</>;
+};
+
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#05060b] flex-col gap-4 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-xl animate-pulse">
-          A
-        </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-slate-300 font-bold tracking-wide animate-pulse">Synchronizing auth details...</p>
-          <p className="text-[10px] text-slate-500 font-mono">Securing gateway tunnel</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-[#05060b]">
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -99,6 +121,9 @@ export default function App() {
           <Route path="/lecture/:lectureId" element={<ProtectedRoute><DashboardLayout><LecturePlayView /></DashboardLayout></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><DashboardLayout><ProfileView /></DashboardLayout></ProtectedRoute>} />
           <Route path="/downloads" element={<ProtectedRoute><DashboardLayout><DownloadsView /></DashboardLayout></ProtectedRoute>} />
+
+          {/* Protected Admin Portal route */}
+          <Route path="/admin" element={<AdminProtectedRoute><AdminView /></AdminProtectedRoute>} />
 
           {/* Catch-all redirect to home */}
           <Route path="*" element={<Navigate to="/home" replace />} />

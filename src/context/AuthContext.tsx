@@ -14,7 +14,7 @@ import {
   updateDoc, 
   onSnapshot 
 } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, OperationType, handleFirestoreError, getFriendlyErrorMessage } from '../firebase';
 import { UserProfile } from '../types';
 import { getOrCreateDeviceId, getDeviceDetails } from '../hooks/useDevToolsDetector';
 
@@ -38,10 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (name: string, email: string, password: string) => {
     setLoading(true);
     try {
+      // 1. Create Firebase Auth account
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const fUser = userCredential.user;
 
-      // Update Firebase Profile Name
+      // 2. Wait until account creation completes successfully, then update profile display name
       await updateProfile(fUser, { displayName: name });
 
       // Gather device details
@@ -58,22 +59,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deviceId,
         browser: details.browser,
         os: details.os,
-        ip: '127.0.0.1', // Mocked or fetched; local default
+        platform: details.platform,
+        ip: '127.0.0.1', // Default / fallback local IP
         createdAt: nowString,
         lastLogin: nowString,
         lastSeen: nowString,
-        photoURL: fUser.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(name)}`,
+        photoURL: '',
         devToolOpenCount: 0,
         devToolTotalTime: 0,
         blocked: false
       };
 
-      // Create doc in Firestore
-      await setDoc(doc(db, 'users', fUser.uid), userProfile);
+      // 3. Create Firestore document and do not continue if write fails
+      try {
+        await setDoc(doc(db, 'users', fUser.uid), userProfile);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `users/${fUser.uid}`);
+      }
+
       setUser(userProfile);
-    } catch (err) {
+    } catch (err: any) {
       setLoading(false);
-      throw err;
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      throw new Error(friendlyMsg);
     }
   };
 
@@ -86,29 +94,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Check current profile first to see if blocked
       const userDocRef = doc(db, 'users', fUser.uid);
-      const userDoc = await getDoc(userDocRef);
+      let userDoc;
+      try {
+        userDoc = await getDoc(userDocRef);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.GET, `users/${fUser.uid}`);
+      }
 
-      if (userDoc.exists()) {
-        const profile = userDoc.data() as UserProfile;
+      const nowString = new Date().toISOString();
+      const details = getDeviceDetails();
+      const deviceId = getOrCreateDeviceId();
+
+      let profile: UserProfile;
+
+      if (!userDoc.exists()) {
+        // Automatically create missing document using authenticated user information
+        profile = {
+          uid: fUser.uid,
+          name: fUser.displayName || email.split('@')[0],
+          email: fUser.email || email,
+          role: 'user',
+          status: 'active',
+          deviceId,
+          browser: details.browser,
+          os: details.os,
+          platform: details.platform,
+          ip: '127.0.0.1',
+          createdAt: nowString,
+          lastLogin: nowString,
+          lastSeen: nowString,
+          photoURL: '',
+          devToolOpenCount: 0,
+          devToolTotalTime: 0,
+          blocked: false
+        };
+
+        try {
+          await setDoc(userDocRef, profile);
+        } catch (err) {
+          handleFirestoreError(err, OperationType.WRITE, `users/${fUser.uid}`);
+        }
+      } else {
+        profile = userDoc.data() as UserProfile;
+        
         if (profile.blocked) {
           await signOut(auth);
           throw new Error('Your account has been blocked.');
         }
 
-        const nowString = new Date().toISOString();
-        const details = getDeviceDetails();
-
-        // Update profile in database
-        await updateDoc(userDocRef, {
+        // Update profile details in database
+        const updateData = {
           lastLogin: nowString,
           lastSeen: nowString,
           browser: details.browser,
-          os: details.os
-        });
+          os: details.os,
+          platform: details.platform
+        };
+
+        try {
+          await updateDoc(userDocRef, updateData);
+        } catch (err) {
+          handleFirestoreError(err, OperationType.UPDATE, `users/${fUser.uid}`);
+        }
+
+        profile = {
+          ...profile,
+          ...updateData
+        };
       }
-    } catch (err) {
+
+      setUser(profile);
+    } catch (err: any) {
       setLoading(false);
-      throw err;
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      throw new Error(friendlyMsg);
     }
   };
 
@@ -141,7 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userDocRef = doc(db, 'users', fUser.uid);
         
         // Listen in real-time to the profile to handle instantaneous block commands
-        unsubscribeProfile = onSnapshot(userDocRef, (snapshot) => {
+        unsubscribeProfile = onSnapshot(userDocRef, async (snapshot) => {
           if (snapshot.exists()) {
             const profile = snapshot.data() as UserProfile;
             
@@ -159,10 +218,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             setUser(profile);
+            setLoading(false);
           } else {
-            console.warn('User document does not exist in Firestore yet.');
+            console.warn('User document does not exist in Firestore yet. Recreating automatically...');
+            const nowString = new Date().toISOString();
+            const details = getDeviceDetails();
+            const deviceId = getOrCreateDeviceId();
+
+            const newProfile: UserProfile = {
+              uid: fUser.uid,
+              name: fUser.displayName || fUser.email?.split('@')[0] || 'Student',
+              email: fUser.email || '',
+              role: 'user',
+              status: 'active',
+              deviceId,
+              browser: details.browser,
+              os: details.os,
+              platform: details.platform,
+              ip: '127.0.0.1',
+              createdAt: nowString,
+              lastLogin: nowString,
+              lastSeen: nowString,
+              photoURL: '',
+              devToolOpenCount: 0,
+              devToolTotalTime: 0,
+              blocked: false
+            };
+
+            try {
+              await setDoc(userDocRef, newProfile);
+            } catch (err) {
+              console.error('Failed to automatically recreate user profile on state change:', err);
+            }
+            setLoading(false);
           }
-          setLoading(false);
         }, (err) => {
           console.error('Error listening to user profile changes:', err);
           setLoading(false);

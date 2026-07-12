@@ -7,6 +7,7 @@ export interface UserProfile {
   deviceId: string;
   browser: string;
   os: string;
+  platform: string;
   ip: string;
   createdAt: string;
   lastLogin: string;

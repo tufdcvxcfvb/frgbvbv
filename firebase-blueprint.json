@@ -13,6 +13,7 @@
         "deviceId": { "type": "string" },
         "browser": { "type": "string" },
         "os": { "type": "string" },
+        "platform": { "type": "string" },
         "ip": { "type": "string" },
         "createdAt": { "type": "string" },
         "lastLogin": { "type": "string" },
@@ -22,7 +23,7 @@
         "devToolTotalTime": { "type": "integer" },
         "blocked": { "type": "boolean" }
       },
-      "required": ["uid", "name", "email", "role", "status", "blocked"]
+      "required": ["uid", "name", "email", "role", "status", "blocked", "platform"]
     },
     "Course": {
       "title": "Course",

@@ -13,14 +13,12 @@ const firebaseConfig = {
   measurementId: "G-PVNMDV9W3N"
 };
 
-const databaseId = "ai-studio-73496abc-00ad-484c-9bf4-4b5d85c6e34e";
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Initialize Firestore with the specific custom database ID
-const db = getFirestore(app, databaseId);
+// Initialize Firestore with the standard default database
+const db = getFirestore(app);
 
 // Enable Offline Persistence safely
 try {
@@ -42,11 +40,12 @@ try {
 async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'settings', 'connection-test'));
+    console.log("Firestore initialized and verified successfully.");
   } catch (error: any) {
     if (error instanceof Error && error.message.includes('offline')) {
       console.warn("Firebase client is offline. Please check your network or Firebase configuration.");
     } else {
-      console.log("Firestore initialized and verified successfully.");
+      console.warn("Firestore connection check failed (this is expected if the 'settings/connection-test' document is missing):", error.message);
     }
   }
 }

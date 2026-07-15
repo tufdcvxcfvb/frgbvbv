@@ -72,8 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // 3. Create Firestore document and do not continue if write fails
       try {
-        await setDoc(doc(db, 'users', fUser.uid), userProfile);
+        console.log('Attempting to create user document in Firestore...', userProfile);
+        await setDoc(doc(db, 'users', fUser.uid), userProfile, { merge: true });
+        console.log('User document created successfully in Firestore');
       } catch (err) {
+        console.error('Firestore setDoc failed:', err);
         handleFirestoreError(err, OperationType.WRITE, `users/${fUser.uid}`);
       }
 
@@ -246,7 +249,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
 
             try {
+              console.log('Recreating missing user profile in Firestore:', newProfile);
               await setDoc(userDocRef, newProfile);
+              console.log('Successfully recreated missing user profile');
             } catch (err) {
               console.error('Failed to automatically recreate user profile on state change:', err);
             }

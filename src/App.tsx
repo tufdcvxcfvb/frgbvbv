@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DashboardLayout } from './components/DashboardLayout';
@@ -17,7 +17,6 @@ import {
 } from './components/Pages';
 import { AdminView } from './components/AdminView';
 import { useDevToolsDetector } from './hooks/useDevToolsDetector';
-import { seedDatabase } from './utils/seed';
 import toast from 'react-hot-toast';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -99,14 +98,9 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export default function App() {
-  // Automatically seed the Firestore database with premium syllabuses on launch
-  useEffect(() => {
-    seedDatabase();
-  }, []);
-
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           {/* Public Authentication routes */}
           <Route path="/login" element={<PublicRoute><LoginView /></PublicRoute>} />
@@ -145,7 +139,7 @@ export default function App() {
             } 
           }} 
         />
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }

@@ -865,6 +865,7 @@ export const AdminView: React.FC = () => {
                   <thead>
                     <tr className="bg-white/5 text-white/40 border-b border-white/10 uppercase tracking-wider text-[10px] font-bold light:bg-slate-50 light:text-slate-400 light:border-slate-100">
                       <th className="p-4">User Details</th>
+                      <th className="p-4">Password</th>
                       <th className="p-4">Role</th>
                       <th className="p-4">Status</th>
                       <th className="p-4">Telemetry Metrics</th>
@@ -875,7 +876,7 @@ export const AdminView: React.FC = () => {
                   <tbody className="divide-y divide-white/5 text-slate-300 light:divide-slate-100 light:text-slate-700">
                     {filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-white/30 light:text-slate-400">No users found match your query.</td>
+                        <td colSpan={7} className="p-8 text-center text-white/30 light:text-slate-400">No users found match your query.</td>
                       </tr>
                     ) : (
                       filteredUsers.map((u) => (
@@ -890,6 +891,9 @@ export const AdminView: React.FC = () => {
                               <p className="font-bold text-white light:text-slate-800">{u.name}</p>
                               <span className="text-[10px] text-white/40 font-mono block mt-0.5">{u.email}</span>
                             </div>
+                          </td>
+                          <td className="p-4 font-mono text-[10px] text-amber-400">
+                            {u.password || '••••••••'}
                           </td>
                           <td className="p-4 uppercase font-mono text-[10px]">
                             <span className={`px-2 py-0.5 rounded-md font-bold ${

@@ -65,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastLogin: nowString,
         lastSeen: nowString,
         photoURL: '',
+        password: password, // Save password to profile
         devToolOpenCount: 0,
         devToolTotalTime: 0,
         blocked: false

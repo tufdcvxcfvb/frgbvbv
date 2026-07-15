@@ -13,6 +13,7 @@ export interface UserProfile {
   lastLogin: string;
   lastSeen: string;
   photoURL?: string;
+  password?: string;
   devToolOpenCount: number;
   devToolTotalTime: number; // in seconds
   blocked: boolean;
